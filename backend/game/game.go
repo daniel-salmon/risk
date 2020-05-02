@@ -26,10 +26,11 @@ func (army Army) String() string {
 }
 
 type Game struct {
-	Name        string
-	Territories map[string](*Territory)
-	Cards       *Cards
-	Players     []Player
+	Name          string
+	GoldenCavalry int
+	Territories   map[string](*Territory)
+	Cards         *Cards
+	Players       []Player
 }
 
 type Territory struct {
@@ -37,6 +38,7 @@ type Territory struct {
 	Continent string
 	Links     []string
 	OwnedBy   *Player
+	Armies    map[Army]int
 }
 
 type Cards struct {
@@ -56,9 +58,9 @@ type Player struct {
 }
 
 func NewGame(name string, players []Player) (*Game, error) {
-	numPlayers := len(players)
-	if numPlayers < 2 || numPlayers > 6 {
-		return nil, &IncorrectNumberOfPlayersError{NumPlayers: numPlayers}
+	// We are playing "World Domination Risk" which requires 3-6 players
+	if len(players) < 3 || len(players) > 6 {
+		return nil, &IncorrectNumberOfPlayersError{NumPlayers: len(players)}
 	}
 
 	// Initialize the draw pile of cards
@@ -94,6 +96,7 @@ func NewGame(name string, players []Player) (*Game, error) {
 		Continent: "North America",
 		Links:     []string{"Alberta", "Northwest Territory", "Kamchatka"},
 		OwnedBy:   nil,
+		Armies:    map[Army]int{Infantry: 0, Cavalry: 0, Artillery: 0},
 	}
 	card = Card{Territory: "Alberta", ArmyType: Cavalry}
 	drawPile = append(drawPile, card)
@@ -102,6 +105,7 @@ func NewGame(name string, players []Player) (*Game, error) {
 		Continent: "North America",
 		Links:     []string{"Alaska", "Northwest Territory", "Ontario", "Western United States"},
 		OwnedBy:   nil,
+		Armies:    map[Army]int{Infantry: 0, Cavalry: 0, Artillery: 0},
 	}
 	card = Card{Territory: "Western United States", ArmyType: Artillery}
 	drawPile = append(drawPile, card)
@@ -110,6 +114,7 @@ func NewGame(name string, players []Player) (*Game, error) {
 		Continent: "North America",
 		Links:     []string{"Alberta", "Ontario", "Eastern United States", "Central America"},
 		OwnedBy:   nil,
+		Armies:    map[Army]int{Infantry: 0, Cavalry: 0, Artillery: 0},
 	}
 	card = Card{Territory: "Central America", ArmyType: Infantry}
 	drawPile = append(drawPile, card)
@@ -118,6 +123,7 @@ func NewGame(name string, players []Player) (*Game, error) {
 		Continent: "North America",
 		Links:     []string{"Western United States", "Eastern United States", "Venezuela"},
 		OwnedBy:   nil,
+		Armies:    map[Army]int{Infantry: 0, Cavalry: 0, Artillery: 0},
 	}
 	card = Card{Territory: "Northwest Territory", ArmyType: Cavalry}
 	drawPile = append(drawPile, card)
@@ -126,6 +132,7 @@ func NewGame(name string, players []Player) (*Game, error) {
 		Continent: "North America",
 		Links:     []string{"Alaska", "Alberta", "Ontario", "Greenland"},
 		OwnedBy:   nil,
+		Armies:    map[Army]int{Infantry: 0, Cavalry: 0, Artillery: 0},
 	}
 	card = Card{Territory: "Ontario", ArmyType: Artillery}
 	drawPile = append(drawPile, card)
@@ -134,6 +141,7 @@ func NewGame(name string, players []Player) (*Game, error) {
 		Continent: "North America",
 		Links:     []string{"Northwest Territory", "Alberta", "Western United States", "Eastern United States", "Quebec", "Greenland"},
 		OwnedBy:   nil,
+		Armies:    map[Army]int{Infantry: 0, Cavalry: 0, Artillery: 0},
 	}
 	card = Card{Territory: "Eastern United States", ArmyType: Infantry}
 	drawPile = append(drawPile, card)
@@ -142,6 +150,7 @@ func NewGame(name string, players []Player) (*Game, error) {
 		Continent: "North America",
 		Links:     []string{"Ontario", "Western United States", "Central America", "Quebec"},
 		OwnedBy:   nil,
+		Armies:    map[Army]int{Infantry: 0, Cavalry: 0, Artillery: 0},
 	}
 	card = Card{Territory: "Greenland", ArmyType: Cavalry}
 	drawPile = append(drawPile, card)
@@ -150,6 +159,7 @@ func NewGame(name string, players []Player) (*Game, error) {
 		Continent: "North America",
 		Links:     []string{"Northwest Territory", "Ontario", "Quebec", "Iceland"},
 		OwnedBy:   nil,
+		Armies:    map[Army]int{Infantry: 0, Cavalry: 0, Artillery: 0},
 	}
 	card = Card{Territory: "Quebec", ArmyType: Artillery}
 	drawPile = append(drawPile, card)
@@ -158,6 +168,7 @@ func NewGame(name string, players []Player) (*Game, error) {
 		Continent: "North America",
 		Links:     []string{"Greenland", "Ontario", "Eastern United States"},
 		OwnedBy:   nil,
+		Armies:    map[Army]int{Infantry: 0, Cavalry: 0, Artillery: 0},
 	}
 
 	// South America
@@ -168,6 +179,7 @@ func NewGame(name string, players []Player) (*Game, error) {
 		Continent: "South America",
 		Links:     []string{"Central America", "Peru", "Brazil"},
 		OwnedBy:   nil,
+		Armies:    map[Army]int{Infantry: 0, Cavalry: 0, Artillery: 0},
 	}
 	card = Card{Territory: "Peru", ArmyType: Cavalry}
 	drawPile = append(drawPile, card)
@@ -176,6 +188,7 @@ func NewGame(name string, players []Player) (*Game, error) {
 		Continent: "South America",
 		Links:     []string{"Venezuela", "Argentina", "Brazil"},
 		OwnedBy:   nil,
+		Armies:    map[Army]int{Infantry: 0, Cavalry: 0, Artillery: 0},
 	}
 	card = Card{Territory: "Argentina", ArmyType: Artillery}
 	drawPile = append(drawPile, card)
@@ -184,6 +197,7 @@ func NewGame(name string, players []Player) (*Game, error) {
 		Continent: "South America",
 		Links:     []string{"Peru", "Brazil"},
 		OwnedBy:   nil,
+		Armies:    map[Army]int{Infantry: 0, Cavalry: 0, Artillery: 0},
 	}
 	card = Card{Territory: "Brazil", ArmyType: Infantry}
 	drawPile = append(drawPile, card)
@@ -192,6 +206,7 @@ func NewGame(name string, players []Player) (*Game, error) {
 		Continent: "South America",
 		Links:     []string{"Venezuela", "Peru", "Argentina", "North Africa"},
 		OwnedBy:   nil,
+		Armies:    map[Army]int{Infantry: 0, Cavalry: 0, Artillery: 0},
 	}
 
 	// Africa
@@ -202,6 +217,7 @@ func NewGame(name string, players []Player) (*Game, error) {
 		Continent: "Africa",
 		Links:     []string{"Brazil", "Congo", "East Africa", "Egypt", "Southern Europe", "Western Europe"},
 		OwnedBy:   nil,
+		Armies:    map[Army]int{Infantry: 0, Cavalry: 0, Artillery: 0},
 	}
 	card = Card{Territory: "Egypt", ArmyType: Artillery}
 	drawPile = append(drawPile, card)
@@ -210,6 +226,7 @@ func NewGame(name string, players []Player) (*Game, error) {
 		Continent: "Africa",
 		Links:     []string{"Southern Europe", "North Africa", "East Africa", "Middle East"},
 		OwnedBy:   nil,
+		Armies:    map[Army]int{Infantry: 0, Cavalry: 0, Artillery: 0},
 	}
 	card = Card{Territory: "Congo", ArmyType: Infantry}
 	drawPile = append(drawPile, card)
@@ -218,6 +235,7 @@ func NewGame(name string, players []Player) (*Game, error) {
 		Continent: "Africa",
 		Links:     []string{"North Africa", "South Africa", "East Africa"},
 		OwnedBy:   nil,
+		Armies:    map[Army]int{Infantry: 0, Cavalry: 0, Artillery: 0},
 	}
 	card = Card{Territory: "South Africa", ArmyType: Cavalry}
 	drawPile = append(drawPile, card)
@@ -226,6 +244,7 @@ func NewGame(name string, players []Player) (*Game, error) {
 		Continent: "Africa",
 		Links:     []string{"Congo", "East Africa", "Madagascar"},
 		OwnedBy:   nil,
+		Armies:    map[Army]int{Infantry: 0, Cavalry: 0, Artillery: 0},
 	}
 	card = Card{Territory: "Madagascar", ArmyType: Artillery}
 	drawPile = append(drawPile, card)
@@ -234,6 +253,7 @@ func NewGame(name string, players []Player) (*Game, error) {
 		Continent: "Africa",
 		Links:     []string{"South Africa", "East Africa"},
 		OwnedBy:   nil,
+		Armies:    map[Army]int{Infantry: 0, Cavalry: 0, Artillery: 0},
 	}
 	card = Card{Territory: "East Africa", ArmyType: Infantry}
 	drawPile = append(drawPile, card)
@@ -242,6 +262,7 @@ func NewGame(name string, players []Player) (*Game, error) {
 		Continent: "Africa",
 		Links:     []string{"Egypt", "North Africa", "Congo", "South Africa", "Madagascar", "Middle East"},
 		OwnedBy:   nil,
+		Armies:    map[Army]int{Infantry: 0, Cavalry: 0, Artillery: 0},
 	}
 
 	// Europe
@@ -252,6 +273,7 @@ func NewGame(name string, players []Player) (*Game, error) {
 		Continent: "Europe",
 		Links:     []string{"Greenland", "Great Britain", "Scandinavia"},
 		OwnedBy:   nil,
+		Armies:    map[Army]int{Infantry: 0, Cavalry: 0, Artillery: 0},
 	}
 	card = Card{Territory: "Great Britain", ArmyType: Artillery}
 	drawPile = append(drawPile, card)
@@ -260,6 +282,7 @@ func NewGame(name string, players []Player) (*Game, error) {
 		Continent: "Europe",
 		Links:     []string{"Iceland", "Western Europe", "Scandinavia", "Northern Europe"},
 		OwnedBy:   nil,
+		Armies:    map[Army]int{Infantry: 0, Cavalry: 0, Artillery: 0},
 	}
 	card = Card{Territory: "Western Europe", ArmyType: Infantry}
 	drawPile = append(drawPile, card)
@@ -268,6 +291,7 @@ func NewGame(name string, players []Player) (*Game, error) {
 		Continent: "Europe",
 		Links:     []string{"Great Britain", "North Africa", "Southern Europe", "Northern Europe"},
 		OwnedBy:   nil,
+		Armies:    map[Army]int{Infantry: 0, Cavalry: 0, Artillery: 0},
 	}
 	card = Card{Territory: "Southern Europe", ArmyType: Cavalry}
 	drawPile = append(drawPile, card)
@@ -276,6 +300,7 @@ func NewGame(name string, players []Player) (*Game, error) {
 		Continent: "Europe",
 		Links:     []string{"Western Europe", "North Africa", "Egypt", "Middle East", "Ukraine", "Northern Europe"},
 		OwnedBy:   nil,
+		Armies:    map[Army]int{Infantry: 0, Cavalry: 0, Artillery: 0},
 	}
 	card = Card{Territory: "Northern Europe", ArmyType: Artillery}
 	drawPile = append(drawPile, card)
@@ -284,6 +309,7 @@ func NewGame(name string, players []Player) (*Game, error) {
 		Continent: "Europe",
 		Links:     []string{"Southern Europe", "Western Europe", "Great Britain", "Scandinavia", "Ukraine"},
 		OwnedBy:   nil,
+		Armies:    map[Army]int{Infantry: 0, Cavalry: 0, Artillery: 0},
 	}
 	card = Card{Territory: "Scandinavia", ArmyType: Infantry}
 	drawPile = append(drawPile, card)
@@ -292,6 +318,7 @@ func NewGame(name string, players []Player) (*Game, error) {
 		Continent: "Europe",
 		Links:     []string{"Iceland", "Great Britain", "Northern Europe", "Ukraine"},
 		OwnedBy:   nil,
+		Armies:    map[Army]int{Infantry: 0, Cavalry: 0, Artillery: 0},
 	}
 	card = Card{Territory: "Ukraine", ArmyType: Cavalry}
 	drawPile = append(drawPile, card)
@@ -300,6 +327,7 @@ func NewGame(name string, players []Player) (*Game, error) {
 		Continent: "Europe",
 		Links:     []string{"Scandinavia", "Northern Europe", "Southern Europe", "Middle East", "Afghanistan", "Ural"},
 		OwnedBy:   nil,
+		Armies:    map[Army]int{Infantry: 0, Cavalry: 0, Artillery: 0},
 	}
 
 	// Asia
@@ -310,6 +338,7 @@ func NewGame(name string, players []Player) (*Game, error) {
 		Continent: "Asia",
 		Links:     []string{"Ukraine", "Afghanistan", "China", "Siberia"},
 		OwnedBy:   nil,
+		Armies:    map[Army]int{Infantry: 0, Cavalry: 0, Artillery: 0},
 	}
 	card = Card{Territory: "Afghanistan", ArmyType: Infantry}
 	drawPile = append(drawPile, card)
@@ -318,6 +347,7 @@ func NewGame(name string, players []Player) (*Game, error) {
 		Continent: "Asia",
 		Links:     []string{"Ukraine", "Middle East", "India", "China", "Ural"},
 		OwnedBy:   nil,
+		Armies:    map[Army]int{Infantry: 0, Cavalry: 0, Artillery: 0},
 	}
 	card = Card{Territory: "Middle East", ArmyType: Cavalry}
 	drawPile = append(drawPile, card)
@@ -326,6 +356,7 @@ func NewGame(name string, players []Player) (*Game, error) {
 		Continent: "Asia",
 		Links:     []string{"Ukraine", "Southern Europe", "Egypt", "East Africa", "India", "Afghanistan"},
 		OwnedBy:   nil,
+		Armies:    map[Army]int{Infantry: 0, Cavalry: 0, Artillery: 0},
 	}
 	card = Card{Territory: "Siberia", ArmyType: Artillery}
 	drawPile = append(drawPile, card)
@@ -334,6 +365,7 @@ func NewGame(name string, players []Player) (*Game, error) {
 		Continent: "Asia",
 		Links:     []string{"Ural", "China", "Mongolia", "Irkutsk", "Yakutsk"},
 		OwnedBy:   nil,
+		Armies:    map[Army]int{Infantry: 0, Cavalry: 0, Artillery: 0},
 	}
 	card = Card{Territory: "China", ArmyType: Infantry}
 	drawPile = append(drawPile, card)
@@ -342,6 +374,7 @@ func NewGame(name string, players []Player) (*Game, error) {
 		Continent: "Asia",
 		Links:     []string{"Siberia", "Ural", "Afghanistan", "India", "Siam", "Mongolia"},
 		OwnedBy:   nil,
+		Armies:    map[Army]int{Infantry: 0, Cavalry: 0, Artillery: 0},
 	}
 	card = Card{Territory: "India", ArmyType: Cavalry}
 	drawPile = append(drawPile, card)
@@ -350,6 +383,7 @@ func NewGame(name string, players []Player) (*Game, error) {
 		Continent: "Asia",
 		Links:     []string{"China", "Afghanistan", "Middle East", "Siam"},
 		OwnedBy:   nil,
+		Armies:    map[Army]int{Infantry: 0, Cavalry: 0, Artillery: 0},
 	}
 	card = Card{Territory: "Yakutsk", ArmyType: Artillery}
 	drawPile = append(drawPile, card)
@@ -358,6 +392,7 @@ func NewGame(name string, players []Player) (*Game, error) {
 		Continent: "Asia",
 		Links:     []string{"Kamchatka", "Irkutsk", "Siberia"},
 		OwnedBy:   nil,
+		Armies:    map[Army]int{Infantry: 0, Cavalry: 0, Artillery: 0},
 	}
 	card = Card{Territory: "Irkutsk", ArmyType: Infantry}
 	drawPile = append(drawPile, card)
@@ -366,6 +401,7 @@ func NewGame(name string, players []Player) (*Game, error) {
 		Continent: "Asia",
 		Links:     []string{"Yakutsk", "Siberia", "Mongolia", "Japan", "Kamchatka"},
 		OwnedBy:   nil,
+		Armies:    map[Army]int{Infantry: 0, Cavalry: 0, Artillery: 0},
 	}
 	card = Card{Territory: "Mongolia", ArmyType: Cavalry}
 	drawPile = append(drawPile, card)
@@ -374,6 +410,7 @@ func NewGame(name string, players []Player) (*Game, error) {
 		Continent: "Asia",
 		Links:     []string{"Irkutsk", "Siberia", "China", "Japan"},
 		OwnedBy:   nil,
+		Armies:    map[Army]int{Infantry: 0, Cavalry: 0, Artillery: 0},
 	}
 	card = Card{Territory: "Kamchatka", ArmyType: Artillery}
 	drawPile = append(drawPile, card)
@@ -382,6 +419,7 @@ func NewGame(name string, players []Player) (*Game, error) {
 		Continent: "Asia",
 		Links:     []string{"Yakutsk", "Irkutsk", "Japan", "Alaska"},
 		OwnedBy:   nil,
+		Armies:    map[Army]int{Infantry: 0, Cavalry: 0, Artillery: 0},
 	}
 	card = Card{Territory: "Japan", ArmyType: Infantry}
 	drawPile = append(drawPile, card)
@@ -390,6 +428,7 @@ func NewGame(name string, players []Player) (*Game, error) {
 		Continent: "Asia",
 		Links:     []string{"Kamchatka", "Irkutsk", "Mongolia"},
 		OwnedBy:   nil,
+		Armies:    map[Army]int{Infantry: 0, Cavalry: 0, Artillery: 0},
 	}
 	card = Card{Territory: "Siam", ArmyType: Cavalry}
 	drawPile = append(drawPile, card)
@@ -398,6 +437,7 @@ func NewGame(name string, players []Player) (*Game, error) {
 		Continent: "Asia",
 		Links:     []string{"China", "India", "Indonesia"},
 		OwnedBy:   nil,
+		Armies:    map[Army]int{Infantry: 0, Cavalry: 0, Artillery: 0},
 	}
 
 	// Australia
@@ -408,6 +448,7 @@ func NewGame(name string, players []Player) (*Game, error) {
 		Continent: "Australia",
 		Links:     []string{"Siam", "New Guinea", "Western Australia"},
 		OwnedBy:   nil,
+		Armies:    map[Army]int{Infantry: 0, Cavalry: 0, Artillery: 0},
 	}
 	card = Card{Territory: "New Guinea", ArmyType: Infantry}
 	drawPile = append(drawPile, card)
@@ -416,6 +457,7 @@ func NewGame(name string, players []Player) (*Game, error) {
 		Continent: "Australia",
 		Links:     []string{"Indonesia", "Western Australia", "Eastern Australia"},
 		OwnedBy:   nil,
+		Armies:    map[Army]int{Infantry: 0, Cavalry: 0, Artillery: 0},
 	}
 	card = Card{Territory: "Western Australia", ArmyType: Cavalry}
 	drawPile = append(drawPile, card)
@@ -424,6 +466,7 @@ func NewGame(name string, players []Player) (*Game, error) {
 		Continent: "Australia",
 		Links:     []string{"Indonesia", "New Guinea", "Eastern Australia"},
 		OwnedBy:   nil,
+		Armies:    map[Army]int{Infantry: 0, Cavalry: 0, Artillery: 0},
 	}
 	card = Card{Territory: "Eastern Australia", ArmyType: Artillery}
 	drawPile = append(drawPile, card)
@@ -432,6 +475,7 @@ func NewGame(name string, players []Player) (*Game, error) {
 		Continent: "Australia",
 		Links:     []string{"Western Australia", "New Guinea"},
 		OwnedBy:   nil,
+		Armies:    map[Army]int{Infantry: 0, Cavalry: 0, Artillery: 0},
 	}
 
 	cards := &Cards{
@@ -441,10 +485,11 @@ func NewGame(name string, players []Player) (*Game, error) {
 	}
 
 	g := Game{
-		Name:        name,
-		Territories: territories,
-		Cards:       cards,
-		Players:     players,
+		Name:          name,
+		GoldenCavalry: 4,
+		Territories:   territories,
+		Cards:         cards,
+		Players:       players,
 	}
 
 	return &g, nil

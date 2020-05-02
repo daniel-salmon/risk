@@ -152,4 +152,22 @@ func TestTerritories(t *testing.T) {
 	if !hasWesternEurope {
 		t.Errorf("Territory %q does not link to %q", "North Africa", "Western Europe")
 	}
+
+	// We check to make sure that no territory is owned by anyone and has no armies
+	// We also check that each territory links to at least one other territory
+	for _, territory := range game.Territories {
+		if territory.OwnedBy != nil {
+			t.Errorf("%q territory is already owned by someone at the start of the game!", territory.Name)
+		}
+
+		for _, army := range territory.Armies {
+			if army != 0 {
+				t.Errorf("%q territory already has armies (%d) on it!", territory.Name, army)
+			}
+		}
+
+		if len(territory.Links) < 1 {
+			t.Errorf("%q territory must link to at least one other territory", territory.Name)
+		}
+	}
 }
