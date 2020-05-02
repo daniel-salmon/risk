@@ -19,16 +19,20 @@ func main() {
 		log.Fatalf("Error parsing flags: %s", err)
 	}
 
-	// Create router
 	router := gin.Default()
 
-	// Set up ping endpoint
-	router.GET("/ping", ping)
+	// Set up routes
+	setUpRoutes(router)
 
 	// Listen and serve
 	router.Run(fmt.Sprintf(":%d", *port))
 }
 
-func ping(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"Success": true})
+func setUpRoutes(router *gin.Engine) {
+	// Health check endpoint
+	router.GET("/health", health)
+}
+
+func health(c *gin.Context) {
+	c.JSON(http.StatusOK, Success{Success: true})
 }
