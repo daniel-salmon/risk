@@ -1,9 +1,5 @@
 package game
 
-import (
-	"fmt"
-)
-
 type Army int
 
 const (
@@ -31,7 +27,7 @@ func (army Army) String() string {
 	return "Uknown"
 }
 
-type Board struct {
+type Game struct {
 	Name string
 	Territories map[string](*Territory)
 	Cards map[string]map[int]int
@@ -50,10 +46,10 @@ type Player struct {
 	Name string
 }
 
-func NewBoard(name string, players []Player) (*Board, error) {
+func NewGame(name string, players []Player) (*Game, error) {
 	numPlayers := len(players)
 	if numPlayers < 2 || numPlayers > 6 {
-		return nil, fmt.Errorf("Invalid number of players. Supports 2 to 6 players, got: %d", numPlayers)
+		return nil, &IncorrectNumberOfPlayersError{NumPlayers: numPlayers}
 	}
 
 	// Initialize cards
@@ -67,7 +63,7 @@ func NewBoard(name string, players []Player) (*Board, error) {
 
 	for i, p := range(players) {
 		if p.ID != i {
-			return nil, fmt.Errorf("Player %d's ID does not match its index. got: ID = %d", i, p.ID)
+			return nil, &PlayerIDMustMatchIndexError{ID: p.ID, Index: i}
 		}
 		cards["Wild"][i] = 0
 		cards["Infantry"][i] = 0
@@ -342,12 +338,12 @@ func NewBoard(name string, players []Player) (*Board, error) {
 		OwnedBy: nil,
 	}
 
-	b := Board{
+	g := Game{
 		Name: name,
 		Territories: territories,
 		Cards: cards,
 		Players: players,
 	}
 
-	return &b, nil
+	return &g, nil
 }
