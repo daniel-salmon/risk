@@ -83,7 +83,7 @@ func TestCards(t *testing.T) {
 
 	// NOTE: The game contains two wild cards + one card per territory
 	if (len(game.Cards.DrawPile) - 2) != len(game.Territories) {
-		t.Errorf("Expected the number of Territory cards to equal the number of Territories. Got: %d, want: %d", len(game.Cards.DrawPile) - 2, len(game.Territories))
+		t.Errorf("Expected the number of Territory cards to equal the number of Territories. Got: %d, want: %d", len(game.Cards.DrawPile)-2, len(game.Territories))
 	}
 
 	if len(game.Cards.DiscardPile) != 0 {
@@ -94,9 +94,8 @@ func TestCards(t *testing.T) {
 		t.Errorf("Unexpected difference between the number of players (%d) and the number of people who can own cards (%d)", len(players), len(game.Cards.OwnedBy))
 	}
 
-
 	// Confirm each player has an empty deck of cards
-	for _, cards := range(game.Cards.OwnedBy) {
+	for _, cards := range game.Cards.OwnedBy {
 		if len(cards) != 0 {
 			t.Errorf("Some player is starting the game with a non-zero number of cards: %d", len(cards))
 		}
@@ -105,11 +104,7 @@ func TestCards(t *testing.T) {
 	// Aside from the wild cards, there should be an equal distribution of cards between each army type
 	// Since there are 42 territories and 3 army types, there should be 14 (=42/3) cards per type
 	armyDist := make(map[Army]int)
-	armyDist[Wild] = 0
-	armyDist[Infantry] = 0
-	armyDist[Cavalry] = 0
-	armyDist[Artillery] = 0
-	for _, card := range(game.Cards.DrawPile) {
+	for _, card := range game.Cards.DrawPile {
 		armyDist[card.ArmyType]++
 	}
 
@@ -148,7 +143,7 @@ func TestTerritories(t *testing.T) {
 		t.Errorf("Game does not have territory %q", "North Africa")
 	}
 	hasWesternEurope := false
-	for _, link := range(northAfrica.Links) {
+	for _, link := range northAfrica.Links {
 		if link == "Western Europe" {
 			hasWesternEurope = true
 			break

@@ -13,7 +13,7 @@ func (e *IncorrectNumberOfPlayersError) Error() string {
 }
 
 type PlayerIDMustMatchIndexError struct {
-	ID int
+	ID    int
 	Index int
 }
 
