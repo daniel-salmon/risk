@@ -5,6 +5,9 @@ import (
 )
 
 func TestArmy(t *testing.T) {
+	if Wild != 0 {
+		t.Errorf("Wild is not worth 0!. Got: %d", Wild)
+	}
 	if Infantry != 1 {
 		t.Errorf("Infantry is not worth 1!. Got: %d", Infantry)
 	}
@@ -15,6 +18,9 @@ func TestArmy(t *testing.T) {
 		t.Errorf("Artillery is not worth 10!. Got: %d", Artillery)
 	}
 
+	if Wild.String() != "Wild" {
+		t.Errorf("Wild string is wrong. Got: %s", Wild.String())
+	}
 	if Infantry.String() != "Infantry" {
 		t.Errorf("Infantry string is wrong. Got: %s", Infantry.String())
 	}
@@ -75,24 +81,49 @@ func TestCards(t *testing.T) {
 		t.Error("Unexpected error while building new game:", err)
 	}
 
-	expectedCards := []string{"Wild", "Infantry", "Cavalry", "Artillery"}
-	for _, card := range(expectedCards) {
-		playerCards, ok := game.Cards[card]
-		if !ok {
-			t.Errorf("Expected card %q to be in the deck", card)
-		}
+	// NOTE: The game contains two wild cards + one card per territory
+	if (len(game.Cards.DrawPile) - 2) != len(game.Territories) {
+		t.Errorf("Expected the number of Territory cards to equal the number of Territories. Got: %d, want: %d", len(game.Cards.DrawPile) - 2, len(game.Territories))
+	}
 
-		if len(playerCards) != len(players) {
-			t.Errorf("Expected number of players within card %q to be the same as the number of players in the game. Got: %d, want: %d", card, len(playerCards), len(players))
-		}
+	if len(game.Cards.DiscardPile) != 0 {
+		t.Error("Discard pile is non-empty at game initialization")
+	}
 
-		sum := 0
-		for _, count := range(playerCards) {
-			sum += count
+	if len(game.Cards.OwnedBy) != len(players) {
+		t.Errorf("Unexpected difference between the number of players (%d) and the number of people who can own cards (%d)", len(players), len(game.Cards.OwnedBy))
+	}
+
+
+	// Confirm each player has an empty deck of cards
+	for _, cards := range(game.Cards.OwnedBy) {
+		if len(cards) != 0 {
+			t.Errorf("Some player is starting the game with a non-zero number of cards: %d", len(cards))
 		}
-		if sum != 0 {
-			t.Errorf("Expected no player to have any cards at the beginning of the game. Got %d cards dealt", sum)
-		}
+	}
+
+	// Aside from the wild cards, there should be an equal distribution of cards between each army type
+	// Since there are 42 territories and 3 army types, there should be 14 (=42/3) cards per type
+	armyDist := make(map[Army]int)
+	armyDist[Wild] = 0
+	armyDist[Infantry] = 0
+	armyDist[Cavalry] = 0
+	armyDist[Artillery] = 0
+	for _, card := range(game.Cards.DrawPile) {
+		armyDist[card.ArmyType]++
+	}
+
+	if armyDist[Wild] != 2 {
+		t.Errorf("Number of Wild cards is not 2. Got: %d, want: %d", armyDist[Wild], 2)
+	}
+	if armyDist[Infantry] != 14 {
+		t.Errorf("Number of Infantry cards is not 14. Got: %d, want: %d", armyDist[Infantry], 14)
+	}
+	if armyDist[Cavalry] != 14 {
+		t.Errorf("Number of Cavalry cards is not 14. Got: %d, want: %d", armyDist[Cavalry], 14)
+	}
+	if armyDist[Artillery] != 14 {
+		t.Errorf("Number of Artillery cards is not 14. Got: %d, want: %d", armyDist[Artillery], 14)
 	}
 }
 
