@@ -26,35 +26,35 @@ func (army Army) String() string {
 }
 
 type Game struct {
-	Name          string
-	GoldenCavalry int
-	Territories   map[string](*Territory)
-	Cards         *Cards
-	Players       []Player
+	Name          string                  `json:"name"`
+	GoldenCavalry int                     `json:"goldenCavalry"`
+	Territories   map[string](*Territory) `json:"territories"`
+	Cards         *Cards                  `json:"cards"`
+	Players       []Player                `json:"players"`
 }
 
 type Territory struct {
-	Name      string
-	Continent string
-	Links     []string
-	OwnedBy   *Player
-	Armies    map[Army]int
+	Name      string       `json:"name"`
+	Continent string       `json:"continent"`
+	Links     []string     `json:"links"`
+	OwnedBy   *Player      `json:"ownedBy"`
+	Armies    map[Army]int `json:"armies"`
 }
 
 type Cards struct {
-	DrawPile    []Card
-	DiscardPile []Card
-	OwnedBy     map[int][]Card
+	DrawPile    []Card         `json:"drawPile"`
+	DiscardPile []Card         `json:"discardPile"`
+	OwnedBy     map[int][]Card `json:"ownedBy"`
 }
 
 type Card struct {
-	Territory string
-	ArmyType  Army
+	Territory string `json:"territory"`
+	ArmyType  Army   `json:"armyType"`
 }
 
 type Player struct {
-	ID   int
-	Name string
+	ID   int    `json:"id"`
+	Name string `json:"name"`
 }
 
 func NewGame(name string, players []Player) (*Game, error) {

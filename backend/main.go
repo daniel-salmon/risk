@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/daniel-salmon/risk/game"
 	"github.com/daniel-salmon/risk/stores"
 
 	"github.com/gin-gonic/gin"
@@ -62,10 +63,69 @@ func newGameHandler(c *gin.Context) {
 		return
 	}
 
-	if err := store.CreateGame(newGame.Name, newGame.Players); err != nil {
+	g, err := store.CreateGame(newGame.Name, newGame.Players)
+	if err != nil {
 		handleError(c, http.StatusInternalServerError, err, nil)
 		return
 	}
+
+	// Transform the game object into the game response object
+	// This removes any data stored in the keys of the game object
+	gameResponse := GameResponse{
+		Name:          g.Name,
+		GoldenCavalry: g.GoldenCavalry,
+		Players:       g.Players,
+		Territories:   []TerritoryResponse{},
+	}
+
+	// Build the territories response object
+	for _, territory := range g.Territories {
+		t := TerritoryResponse{
+			Name:      territory.Name,
+			Continent: territory.Continent,
+			Links:     territory.Links,
+			OwnedBy:   territory.OwnedBy,
+			Armies:    []ArmyResponse{},
+		}
+		for army, value := range territory.Armies {
+			a := ArmyResponse{
+				Type:  army.String(),
+				Value: value,
+			}
+			t.Armies = append(t.Armies, a)
+		}
+
+		gameResponse.Territories = append(gameResponse.Territories, t)
+	}
+
+	// Build the cards response object
+	cardsResponse := CardsResponse{
+		DrawPile:    (*g.Cards).DrawPile,
+		DiscardPile: (*g.Cards).DiscardPile,
+		Owned:       []CardOwnedResponse{},
+	}
+
+	// For convenience we break out the slice of players into a map keyed by the player id
+	// This makes it easier to unwrap the cards objects owned by players
+	pMap := make(map[int](game.Player))
+	for _, p := range g.Players {
+		pMap[p.ID] = p
+	}
+
+	for pID, cards := range (*g.Cards).OwnedBy {
+		for _, card := range cards {
+			k := CardOwnedResponse{
+				OwnedBy: pMap[pID],
+				Card:    card,
+			}
+			cardsResponse.Owned = append(cardsResponse.Owned, k)
+		}
+	}
+
+	// Add the cards response to the game reponse object
+	gameResponse.Cards = cardsResponse
+
+	c.JSON(http.StatusOK, gameResponse)
 }
 
 // handleError logs the internal error encountered by the service
