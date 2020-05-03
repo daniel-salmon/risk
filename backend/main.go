@@ -30,9 +30,31 @@ func main() {
 
 func setUpRoutes(router *gin.Engine) {
 	// Health check endpoint
-	router.GET("/health", health)
+	router.GET("/health", healthHandler)
+
+	// Create a new game
+	router.POST("/game", newGameHandler)
 }
 
-func health(c *gin.Context) {
+func healthHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, Success{Success: true})
+}
+
+func newGameHandler(c *gin.Context) {
+	var newGame NewGame
+	if err := c.ShouldBindJSON(&newGame); err != nil {
+		e := Error{
+			Success: false,
+			Message: fmt.Sprintf("Missing required fields %q and %q", "name", "players"),
+		}
+		handleError(c, http.StatusBadRequest, err, e)
+		return
+	}
+}
+
+// handleError logs the internal error encountered by the service
+// and returns the provided HTTP status code along with the custom error message to the client
+func handleError(c *gin.Context, HTTPStatusCode int, err error, customError Error) {
+	c.Error(err)
+	c.JSON(HTTPStatusCode, customError)
 }

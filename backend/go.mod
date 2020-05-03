@@ -1,4 +1,4 @@
-module risk
+module github.com/daniel-salmon/risk
 
 go 1.13
 
