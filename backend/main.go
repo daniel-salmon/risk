@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"log"
@@ -14,7 +15,10 @@ import (
 	"github.com/peterbourgon/ff/v3"
 )
 
-var store stores.Store
+var (
+	header http.Header
+	store stores.Store
+)
 
 func main() {
 	var (
@@ -31,13 +35,43 @@ func main() {
 	}
 	defer store.Close()
 
+	// Establish required HTTP header
+	header = http.Header{"Accept": []string{"application/json"}, "Content-Type": []string{"application/json"}}
+
+	// Create gin HTTP router
 	router := gin.Default()
+
+	// register middleware
+	registerMiddleware(router)
 
 	// Set up routes
 	setUpRoutes(router)
 
 	// Listen and serve
 	router.Run(fmt.Sprintf(":%d", *port))
+}
+
+func registerMiddleware(router *gin.Engine) {
+	router.HandleMethodNotAllowed = true
+
+	// Require Accept: application/json in Header
+	router.Use(func(c *gin.Context) {
+		// NOTE: It's entirely possible that more than one Accept header has been specified and this
+		// will miss the one that is 'application/json', but this should be an edge case and I don't
+		// mind rejecting those requests
+		err := errors.New("Request's HTTP 'Accept' header does not match 'application/json'")
+		if c.Request.Header.Get("Accept") != "application/json" {
+			c.AbortWithError(http.StatusNotAcceptable, err)
+		}
+	})
+
+	// Require *only* Content-Type: application/json in Header
+	router.Use(func(c *gin.Context) {
+		err := errors.New("Request's HTTP 'Content-Type' header is invalid, requires *only* 'application/json'")
+		if c.Request.Header.Get("Content-Type") != "application/json" {
+			c.AbortWithError(http.StatusUnsupportedMediaType, err)
+		}
+	})
 }
 
 func setUpRoutes(router *gin.Engine) {
@@ -49,6 +83,11 @@ func setUpRoutes(router *gin.Engine) {
 }
 
 func healthHandler(c *gin.Context) {
+	log.Println(c.Request.Header)
+	if c.Request.Header.Get("Content-Type") != "application/json" {
+		c.JSON(http.StatusBadRequest, Error{Success: false, Message: "shit"})
+		return
+	}
 	c.JSON(http.StatusOK, Success{Success: true})
 }
 
