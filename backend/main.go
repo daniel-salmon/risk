@@ -16,7 +16,6 @@ import (
 )
 
 var (
-	header http.Header
 	store stores.Store
 )
 
@@ -34,9 +33,6 @@ func main() {
 		log.Fatalf("Error building store: %s", err)
 	}
 	defer store.Close()
-
-	// Establish required HTTP header
-	header = http.Header{"Accept": []string{"application/json"}, "Content-Type": []string{"application/json"}}
 
 	// Create gin HTTP router
 	router := gin.Default()
@@ -83,11 +79,6 @@ func setUpRoutes(router *gin.Engine) {
 }
 
 func healthHandler(c *gin.Context) {
-	log.Println(c.Request.Header)
-	if c.Request.Header.Get("Content-Type") != "application/json" {
-		c.JSON(http.StatusBadRequest, Error{Success: false, Message: "shit"})
-		return
-	}
 	c.JSON(http.StatusOK, Success{Success: true})
 }
 
